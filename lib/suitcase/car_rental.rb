@@ -1,8 +1,11 @@
 module Suitcase
   class CarRental
-    attr_accessor :seating, :type_name, :type_code, :possible_features, :possible_models
+    attr_accessor :seating, :type_name, :type_code, :possible_features, :possible_models, :deep_link, :total_price, :daily_rate
 
     def initialize(data)
+      @deep_link = data["DeepLink"]
+      @total_price = data["TotalPrice"]
+      @daily_rate = data["DailyRate"]
       @seating = data["CarTypeSeating"]
       @type_name = data["CarTypeName"]
       @type_code = data["CarTypeCode"]
@@ -15,7 +18,19 @@ module Suitcase
         parsed = parse_json(build_url(info))
         parse_errors(parsed)
 
-        parsed["MetaData"]["CarMetaData"]["CarTypes"].map do |data|
+        h = Hash.new
+        h["1"] = parsed["MetaData"]["CarMetaData"]["CarTypes"]
+        h["2"] = parsed["Result"]
+
+        results = Hash[
+                    h.keys.join,
+                    h.values.transpose.map { |hashes| hashes.inject &:merge  }
+                  ]
+        rescue
+          puts 'I am rescued.' 
+        else
+
+        results["12"].map do |data|
           CarRental.new(data)
         end
       end
@@ -49,6 +64,7 @@ module Suitcase
 
       def parse_errors(parsed)
         if parsed["Errors"] && !parsed["Errors"].empty?
+          binding.pry_remote
           parsed["Errors"].each { |e| raise e }
         end
       end
