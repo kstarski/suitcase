@@ -217,7 +217,8 @@ module Suitcase
       )
       parsed_info[:amenities] = parsed["HotelInformationResponse"]["PropertyAmenities"]["PropertyAmenity"].map do |x|
         Amenity.new(id: x["amenityId"], description: x["amenity"])
-      end if parsed["HotelInformationResponse"]
+      # end if parsed["HotelInformationResponse"]
+      end rescue nil
       parsed_info[:images] = images(parsed) if images(parsed)
       if parsed["HotelInformationResponse"]
         parsed_info[:property_description] = parsed["HotelInformationResponse"]["HotelDetails"]["propertyDescription"]
