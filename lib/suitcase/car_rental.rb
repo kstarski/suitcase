@@ -64,7 +64,7 @@ module Suitcase
 
       def parse_errors(parsed)
         if parsed["Errors"] && !parsed["Errors"].empty?
-          binding.pry_remote
+          # binding.pry_remote
           parsed["Errors"].each { |e| raise e }
         end
       end
