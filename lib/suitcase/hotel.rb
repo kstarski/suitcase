@@ -21,15 +21,15 @@ module Suitcase
     # Public: The Amenities that can be passed in to searches, and are returned
     #         from many queries.
     AMENITIES = { 
-      pool: 1,
-      fitness_center: 2,
-      restaurant: 3,
-      children_activities: 4,
-      breakfast: 5,
-      meeting_facilities: 6,
-      pets: 7,
-      wheelchair_accessible: 8,
-      kitchen: 9
+      :pool => 1,
+      :fitness_center => 2,
+      :restaurant => 3,
+      :children_activities => 4,
+      :breakfast => 5,
+      :meeting_facilities => 6,
+      :pets => 7,
+      :wheelchair_accessible => 8,
+      :kitchen => 9
     }
 
     attr_accessor :id, :name, :address, :city, :province, :amenities,
@@ -81,12 +81,12 @@ module Suitcase
     #
     # Returns a single Hotel.
     def self.find_by_id(id, session)
-      params = { hotelId: id }
+      params = { :hotelId => id }
 
       if Configuration.cache? and Configuration.cache.cached?(:info, params)
         raw = Configuration.cache.get_query(:info, params)
       else
-        url = url(method: "info", params: params, session: session)
+        url = url(:method => "info", :params => params, :session => session)
         raw = parse_response(url)
         handle_errors(raw)
         if Configuration.cache?
@@ -108,12 +108,12 @@ module Suitcase
     #
     # Returns an Array of Hotels.
     def self.find_by_ids(ids, session)
-      params = { hotelIdList: ids.join(",") }
+      params = { :hotelIdList => ids.join(",") }
 
       if Configuration.cache? and Configuration.cache.cached?(:list, params)
         raw = Configuration.cache.get_query(:list, params)
       else
-        url = url(method: "list", params: params, session: session)
+        url = url(:method => "list", :params => params, :session => session)
         raw = parse_response(url)
         handle_errors(raw)
         if Configuration.cache?
@@ -172,7 +172,7 @@ module Suitcase
       if Configuration.cache? and Configuration.cache.cached?(:list, params)
         parsed = Configuration.cache.get_query(:list, params)
       else
-        url = url(method: "list", params: params, session: info[:session])
+        url = url(:method => "list", :params => params, :session => info[:session])
         parsed = parse_response(url)
         handle_errors(parsed)
         if Configuration.cache?
@@ -203,34 +203,33 @@ module Suitcase
       else
         res = parsed["HotelInformationResponse"]
         summary = res["HotelSummary"]
-        parsed_info = {
-          general_policies: res["HotelDetails"]["hotelPolicy"],
-          checkin_instructions: res["HotelDetails"]["checkInInstructions"]
+        parsed_info = {:general_policies => res["HotelDetails"]["hotelPolicy"],
+          :checkin_instructions => res["HotelDetails"]["checkInInstructions"]
         }
       end
       proximity_distance = summary["proximityDistance"].to_s
       proximity_distance << summary["proximityUnit"].to_s
       parsed_info.merge!(
-        id: summary["hotelId"],
-        name: summary["name"],
-        address: summary["address1"],
-        city: summary["city"],
-        postal_code: summary["postalCode"],
-        country_code: summary["countryCode"],
-        rating: summary["hotelRating"],
-        high_rate: summary["highRate"],
-        low_rate: summary["lowRate"],
-        latitude: summary["latitude"].to_f,
-        longitude: summary["longitude"].to_f,
-        province: summary["stateProvinceCode"],
-        airport_code: summary["airportCode"],
-        property_category: summary["propertyCategory"].to_i,
-        proximity_distance: proximity_distance,
-        tripadvisor_rating: summary["tripAdvisorRating"],
-        deep_link: summary["deepLink"]
+        :id => summary["hotelId"],
+        :name => summary["name"],
+        :address => summary["address1"],
+        :city => summary["city"],
+        :postal_code => summary["postalCode"],
+        :country_code => summary["countryCode"],
+        :rating => summary["hotelRating"],
+        :high_rate => summary["highRate"],
+        :low_rate => summary["lowRate"],
+        :latitude => summary["latitude"].to_f,
+        :longitude => summary["longitude"].to_f,
+        :province => summary["stateProvinceCode"],
+        :airport_code => summary["airportCode"],
+        :property_category => summary["propertyCategory"].to_i,
+        :proximity_distance => proximity_distance,
+        :tripadvisor_rating => summary["tripAdvisorRating"],
+        :deep_link => summary["deepLink"]
       )
       parsed_info[:amenities] = parsed["HotelInformationResponse"]["PropertyAmenities"]["PropertyAmenity"].map do |x|
-        Amenity.new(id: x["amenityId"], description: x["amenity"])
+        Amenity.new(:id => x["amenityId"], :description => x["amenity"])
       # end if parsed["HotelInformationResponse"]
       end rescue nil
       parsed_info[:images] = images(parsed) if images(parsed)
@@ -290,7 +289,7 @@ module Suitcase
     #
     # Returns an Array of Rooms.
     def rooms(info)
-      params = { rooms: [{adults: 1, children_ages: []}] }.merge(info)
+      params = { :rooms => [{:adults => 1, :children_ages => []}] }.merge(info)
       params[:rooms].each_with_index do |room, n|
         index = n+1
         params["room#{index}"] = room[:adults].to_s
@@ -309,7 +308,7 @@ module Suitcase
       if Configuration.cache? and Configuration.cache.cached?(:avail, params)
         parsed = Configuration.cache.get_query(:avail, params)
       else
-        parsed = Hotel.parse_response(Hotel.url(method: "avail", params: params, session: info[:session]))
+        parsed = Hotel.parse_response(Hotel.url(:method => "avail", :params => params, :session => info[:session]))
         Hotel.handle_errors(parsed)
         if Configuration.cache?
           Configuration.cache.save_query(:avail, params, parsed)
@@ -352,7 +351,7 @@ module Suitcase
           [raw_data["RateInfo"]["ChargeableRateInfo"]["Surcharges"]["Surcharge"]].
           flatten.map { |s| Surcharge.parse(s) }
         room_data[:bed_types] = [raw_data["BedTypes"]["BedType"]].flatten.map do |x|
-          BedType.new(id: x["@id"], description: x["description"])
+          BedType.new(:id => x["@id"], :description => x["description"])
         end if raw_data["BedTypes"] && raw_data["BedTypes"]["BedType"]
 
         r = Room.new(room_data)
