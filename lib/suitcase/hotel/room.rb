@@ -81,11 +81,11 @@ module Suitcase
         params["postalCode"] = info[:postal_code]
 
         uri = Room.url(
-          method: "res",
-          params: params,
-          include_key: true,
-          include_cid: true,
-          secure: true
+          :method => "res",
+          :params => params,
+          :include_key => true,
+          :include_cid => true,
+          :secure => true
         )
         session = Patron::Session.new
         session.timeout = 30000
@@ -102,9 +102,9 @@ module Suitcase
           []
         end
         r = Reservation.new(
-          itinerary_id: reservation_res["itineraryId"],
-          confirmation_numbers: reservation_res["confirmationNumbers"],
-          surcharges: surcharges 
+          :itinerary_id => reservation_res["itineraryId"],
+          :confirmation_numbers => reservation_res["confirmationNumbers"],
+          :surcharges => surcharges 
         )
         r.raw = parsed
         r

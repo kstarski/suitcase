@@ -41,14 +41,14 @@ module Suitcase
         def parse(raw)
           [raw["LocationInfoResponse"]["LocationInfos"]["LocationInfo"]].flatten.map do |raw|
             Location.new(
-              province: raw["stateProvinceCode"],
-              destination_id: raw["destinationId"],
-              type: raw["type"],
-              city: raw["city"],
-              active: raw["active"],
-              code: raw["code"],
-              country: raw["country"],
-              country_code: raw["countryCode"]
+              :province =>  raw["stateProvinceCode"],
+              :destination_id => raw["destinationId"],
+              :type => raw["type"],
+              :city => raw["city"],
+              :active => raw["active"],
+              :code => raw["code"],
+              :country => raw["country"],
+              :country_code => raw["countryCode"]
             ) 
           end
         end

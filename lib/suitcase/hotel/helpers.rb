@@ -10,11 +10,11 @@ module Suitcase
     module Helpers
       # Internal: Defaults for the builder options to Helpers#url.
       URL_DEFAULTS = {
-        include_key: true,
-        include_cid: true,
-        secure: false,
-        as_form: false,
-        session: Session.new
+        :include_key => true,
+        :include_cid => true,
+        :secure => false,
+        :as_form => false,
+        :session => Session.new
       }
 
       # Internal: Parameterize a Hash.
@@ -131,12 +131,12 @@ module Suitcase
           if message =~ /Multiple locations/ && (info = info[key]["LocationInfos"])
             exception.type = :multiple_locations
             exception.recovery = {
-              alternate_locations: info["LocationInfo"].map do |info|
+              :alternate_locations => info["LocationInfo"].map do |info|
               Location.new(
-                destination_id: info["destinationId"],
-                type: info["type"],
-                city: info["city"],
-                province: info["stateProvinceCode"]
+                :destination_id => info["destinationId"],
+                :type => info["type"],
+                :city => info["city"],
+                :province => info["stateProvinceCode"]
               )
               end
             }

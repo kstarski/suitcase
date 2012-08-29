@@ -16,7 +16,7 @@ module Suitcase
       #
       # Returns a Surcharge representing the info.
       def self.parse(info)
-        new(amount: info["@amount"], type: info["@type"])
+        new(:amount => info["@amount"], :type => info["@type"])
       end
     end
   end
