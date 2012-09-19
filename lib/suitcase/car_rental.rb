@@ -9,28 +9,22 @@ module Suitcase
       @seating = data["CarTypeSeating"]
       @type_name = data["CarTypeName"]
       @type_code = data["CarTypeCode"]
-      @possible_features = data["PossibleFeatures"].split(", ")
-      @possible_models = data["PossibleModels"].split(", ")
+      @possible_features = data["PossibleFeatures"]
+      @possible_models = data["PossibleModels"].split(', ') if data["PossibleModels"]
     end
 
     class << self
+      
       def find(info)
         parsed = parse_json(build_url(info))
         parse_errors(parsed)
-
-        h = Hash.new
-        h["1"] = parsed["MetaData"]["CarMetaData"]["CarTypes"]
-        h["2"] = parsed["Result"]
-
-        results = Hash[
-                    h.keys.join,
-                    h.values.transpose.map { |hashes| hashes.inject &:merge  }
-                  ]
-        rescue
-          puts 'I am rescued.' 
-        else
-
-        results["12"].map do |data|
+        car_types = parsed["MetaData"]["CarMetaData"]["CarTypes"]
+        
+        parsed["Result"].map do |data|
+          car_type = car_types.select{|c| c["CarTypeCode"] == data["CarTypeCode"]}.first
+          data["PossibleModels"] = car_type["PossibleModels"]
+          data["PossibleFeatures"] = car_type["PossibleFeatures"]
+          data["CarTypeName"] = car_type["CarTypeName"]
           CarRental.new(data)
         end
       end
@@ -64,7 +58,6 @@ module Suitcase
 
       def parse_errors(parsed)
         if parsed["Errors"] && !parsed["Errors"].empty?
-          # binding.pry_remote
           parsed["Errors"].each { |e| raise e }
         end
       end
