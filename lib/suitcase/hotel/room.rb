@@ -75,11 +75,17 @@ module Suitcase
           params["room#{index}LastName"] = room[:last_name] || params["lastName"] # person's name
           params["room#{index}BedTypeId"] = room[:bed_type].id if @supplier_type == "E"
           params["room#{index}SmokingPreference"] = room[:smoking_preference] || "E"
+          params["room#{index}numberOfAdults"] = room[:adults]
         end
         params["stateProvinceCode"] = info[:province]
         params["countryCode"] = info[:country]
         params["postalCode"] = info[:postal_code]
-
+        params["minorRev"] = 16
+        params["currencyCode"] = "USD"
+        params["customerIpAddress"] = info[:ip_address]
+        params["customerUserAgent"] = info[:user_agent]
+        # params["customerSessionId"] = info[:session_id]
+        
         uri = Room.url(
           :method => "res",
           :params => params,
@@ -92,15 +98,15 @@ module Suitcase
         session.base_url = "https://" + uri.host
         res = session.post uri.request_uri, {}
         parsed = JSON.parse res.body
-
         reservation_res = parsed["HotelRoomReservationResponse"]
         handle_errors(parsed)
-        surcharges = if @supplier_type == "E" && reservation_res["RateInfo"]["ChargeableRateInfo"]["Surcharges"]
-          [reservation_res["RateInfo"]["ChargeableRateInfo"]["Surcharges"]["Surcharge"]].
-            flatten.map { |s| Surcharge.parse(s) }
-        else
-          []
+        begin
+          if @supplier_type == "E" && reservation_res["RateInfos"]["RateInfo"]["ChargeableRateInfo"]["Surcharges"]
+            surcharges = [reservation_res["RateInfos"]["RateInfo"]["ChargeableRateInfo"]["Surcharges"]["Surcharge"]].flatten.map { |s| Surcharge.parse(s) }
+          end
+        rescue
         end
+        surcharges ||= []
         r = Reservation.new(
           :itinerary_id => reservation_res["itineraryId"],
           :confirmation_numbers => reservation_res["confirmationNumbers"],
